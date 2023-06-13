@@ -1,5 +1,6 @@
 package state;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkGenerator;
 import org.apache.flink.api.common.eventtime.WatermarkGeneratorSupplier;
@@ -39,7 +40,7 @@ public class costState {
                 String[] str = s.split(" ");
                 return new costEvent(str[0], Integer.valueOf(str[1]), Long.valueOf(str[2]));
             }
-       }).filter(line->handleDate(line.getTimeStamp())).assignTimestampsAndWatermarks(WatermarkStrategy.<costEvent>forMonotonousTimestamps().withTimestampAssigner(new SerializableTimestampAssigner<costEvent>() {
+        }).filter(line->handleDate(line.getTimeStamp())).assignTimestampsAndWatermarks(WatermarkStrategy.<costEvent>forMonotonousTimestamps().withTimestampAssigner(new SerializableTimestampAssigner<costEvent>() {
             @Override
             public long extractTimestamp(costEvent costEvent, long l) {
                 return costEvent.getTimeStamp();
@@ -47,18 +48,20 @@ public class costState {
         }));
         Properties properties=new Properties();
         properties.setProperty("bootstrap.servers","localhost:9092");
-        stream.keyBy(costEvent::getCustomerId).process(new costProcess(3600*1000L)).map(new MapFunction<result, String>() {
+        stream.keyBy(costEvent::getCustomerId).process(new state.costState.costProcess(3600*1000L)).map(new MapFunction<String, String>() {
             @Override
-            public String map(result result) throws Exception {
-                return result.getStart()+" "+result.getCost();
+            public String map(String result) throws Exception {
+                String[] str = result.split("_");
+                result res = new result(str[0], str[1], Integer.valueOf(str[2]));
+                return JSON.toJSONString(res);
             }
         }).addSink(new FlinkKafkaProducer<String>(
-                        "res",
-                        new SimpleStringSchema(),
-                        properties));
+                "res",
+                new SimpleStringSchema(),
+                properties));
         env.execute();
     }
-    public static class costProcess extends KeyedProcessFunction<String,costEvent,result>{
+    public static class costProcess extends KeyedProcessFunction<String,costEvent,String>{
         private final Long size;
         private MapState<String,Integer> res;
         public costProcess(Long size){
@@ -77,7 +80,7 @@ public class costState {
         }
 
         @Override
-        public void processElement(costEvent costEvent, KeyedProcessFunction<String, costEvent, result>.Context context, Collector<result> collector) throws Exception {
+        public void processElement(costEvent costEvent, KeyedProcessFunction<String, costEvent, String>.Context context, Collector<String> collector) throws Exception {
 
             Long start=costEvent.getTimeStamp()/size*size;
             long end=start+size;
@@ -91,11 +94,11 @@ public class costState {
         }
 
         @Override
-        public void onTimer(long timestamp, KeyedProcessFunction<String, costEvent, result>.OnTimerContext ctx, Collector<result> out) throws Exception {
+        public void onTimer(long timestamp, KeyedProcessFunction<String, costEvent, String>.OnTimerContext ctx, Collector<String> out) throws Exception {
             long end=timestamp+1;
             long start=end-size;
             Integer cost = res.get(ctx.getCurrentKey()+"_"+start);
-            out.collect(new result(ctx.getCurrentKey()+"_"+simpleDateFormat.format(start),cost));
+            out.collect(ctx.getCurrentKey()+"_"+simpleDateFormat.format(start)+"_"+cost);
         }
     }
     private static boolean handleDate(long time) throws ParseException {
@@ -103,11 +106,7 @@ public class costState {
         Date date = new Date(time);
         Date now = sdf.parse(sdf.format(new Date()));
         long nowTime = now.getTime();
-        if(time<=nowTime){
-            return false;
-        }else{
-            return true;
-        }
+        return time > nowTime;
     }
 
 }
