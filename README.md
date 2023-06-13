@@ -12,7 +12,19 @@
 9. 重写onTimer()函数，实现定时器触发后的逻辑。得到所属时间范围的开始时间和根据客户id作为key取出对应消耗，拼接为 客户id_小时开始时间_消耗输出
 10. 转换为json字符串写入对应的topic中
 ## 测试
-1. producer
-![Image text](https://github.com/Spider-Man123/FlinkHourCost/blob/4c3bc19b1e211c64d21a609cb78ab2857f7fba9c/img/producer.png)
-3. consumer
-![Image text](https://github.com/Spider-Man123/FlinkHourCost/blob/4c3bc19b1e211c64d21a609cb78ab2857f7fba9c/img/consumer.png)
+1. 数据
+  bob 100000 1686560460000 /2023-06-12 17:01 --昨天的
+  bob 100 1686639600000 /2023-06-13 15:00
+  mary 100 1686641400000 / 2023-06-13 15:30
+  bob 1000 1686642000000 /15:40
+  mary 1000 1686644880000 /2023-06-13 16:28
+  bob 10000 1686645600000 /2023-06-13 16:40
+  bob 2 1686639720000/ 2023-06-13 15:02 --迟来的
+  bob 4 1686646860000/2023-06-13 17:01 --正常来的
+  bob 3 1686672060000 /2023-06-14 00:01 --第二天的
+  mary 2 1686675900000 / 2023-06-14 01:05
+3. 结果
+  a. producer
+  ![Image text](https://github.com/Spider-Man123/FlinkHourCost/blob/4c3bc19b1e211c64d21a609cb78ab2857f7fba9c/img/producer.png)
+  b. consumer
+  ![Image text](https://github.com/Spider-Man123/FlinkHourCost/blob/4c3bc19b1e211c64d21a609cb78ab2857f7fba9c/img/consumer.png)
