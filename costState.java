@@ -25,7 +25,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
-
+/*
+    需要说明其中使用到的环境配置和消息队列的代码需要自己配置属于自己的，我的kafka消费生产等代码未展示
+*/
 public class costState {
     public static void main(String[] args) throws Exception {
         FlinkUtils flinkUtils = new FlinkUtils();
