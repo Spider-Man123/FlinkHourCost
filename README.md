@@ -13,6 +13,6 @@
 10. 转换为json字符串写入对应的topic中
 ## 测试
 1. producer
-img/producer.png
+![Image text](https://github.com/Spider-Man123/FlinkHourCost/blob/4c3bc19b1e211c64d21a609cb78ab2857f7fba9c/img/producer.png)
 3. consumer
-img/consumer.png
+![Image text](https://github.com/Spider-Man123/FlinkHourCost/blob/4c3bc19b1e211c64d21a609cb78ab2857f7fba9c/img/consumer.png)
