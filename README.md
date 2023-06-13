@@ -11,3 +11,8 @@
 8. 重写processElement()函数，根据数据时间戳判断所属小时范围，并且根据所属小时结束时间注册定时器，如果mapState中包含了数据中的客户id+所属小时,说明这个小时内还消耗过，因此进行累加，如果不包含，那么就想mapState新加入。key：客户id_小时开始时间
 9. 重写onTimer()函数，实现定时器触发后的逻辑。得到所属时间范围的开始时间和根据客户id作为key取出对应消耗，拼接为 客户id_小时开始时间_消耗输出
 10. 转换为json字符串写入对应的topic中
+## 测试
+1. producer
+img/producer.png
+3. consumer
+img/consumer.png
